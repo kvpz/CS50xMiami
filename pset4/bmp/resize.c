@@ -53,6 +53,10 @@ void changeBMPMetaData( BITMAPFILEHEADER* bf, BITMAPINFOHEADER* bi,
         bf->bfSize = new_resolution * 3 + 54 + total_padding_bytes; // include padding
         bi->biSizeImage = new_resolution * 3 + total_padding_bytes;
     }
+    
+    if(resize_value == 1)
+        *newPadding = getPadding(bi->biWidth, sizeof(RGBTRIPLE));
+
 }
 
 int main(int argc, char* argv[])
@@ -117,7 +121,7 @@ int main(int argc, char* argv[])
     int original_biWidth = bi.biWidth;
     int originalPadding = getPadding(bi.biWidth, sizeof(RGBTRIPLE));
     int newPadding = 0;
-    changeBMPMetaData( &bf, &bi , &newPadding, resize_value);
+    changeBMPMetaData( &bf, &bi , &newPadding, resize_value );
     
     // write outfile's BITMAPFILEHEADER
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
@@ -127,16 +131,16 @@ int main(int argc, char* argv[])
     
     fpos_t previousLine; // Used to print a scanline again to resize height
     fgetpos(inptr, &previousLine);
-    int lineHeight = 0;
     
     // iterate over infile's scanlines
+    int lineHeight = 0;
     int biHeight = abs(bi.biHeight);
     for (int i = 0; i < biHeight; i++)
     {
         // iterate over pixels in scanline
         for (int j = 0; j < original_biWidth; j++)
         {
-            // temporary storage
+            // temporary storage 
             RGBTRIPLE triple;
             
             // read RGB triple from infile
@@ -144,14 +148,9 @@ int main(int argc, char* argv[])
 
             // write RGB triple to outfile
             for(int itr = 0; itr < resize_value; ++itr)
-            {
-                
                 fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
-                printf("0x%x%x%x ", triple.rgbtBlue, triple.rgbtGreen, triple.rgbtRed);   
-            }
         }
 
-        
         // skip over padding, if any
         fseek(inptr, originalPadding, SEEK_CUR);
         
@@ -166,10 +165,10 @@ int main(int argc, char* argv[])
             fsetpos(inptr, &previousLine);
         else
         {
-            //fgetpos(inptr, &previousLine);
+            fgetpos(inptr, &previousLine);
             lineHeight = 0;
         }
-        printf("\n");
+        //printf("\n");
     }
 
     // close infile
