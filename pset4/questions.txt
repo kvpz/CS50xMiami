@@ -1,0 +1,39 @@
+0. How many different colors does each format support?
+
+1. Which of the formats supports animation?
+
+2. What’s the difference between lossy and lossless compression?
+
+3. Which of these formats is lossy-compressed?
+
+4. How many different colors does each format support?
+
+5. Which of the formats supports animation?
+
+6. What’s the difference between lossy and lossless compression?
+
+7. Which of these formats is lossy-compressed?
+
+What’s stdint.h?
+
+What’s the point of using uint8_t, uint32_t, int32_t, and uint16_t in a program?
+
+How many bytes is a BYTE, a DWORD, a LONG, and a WORD, respectively?
+
+What (in ASCII, decimal, or hexadecimal) must the first two bytes of any BMP file be? (Leading bytes used to identify file formats (with high probability) are generally called "magic numbers.)"
+
+What’s the difference between bfSize and biSize?
+
+What does it mean if biHeight is negative?
+
+What field in BITMAPINFOHEADER specifies the BMP’s color depth (i.e., bits per pixel)?
+
+Why might fopen return NULL in copy.c:37?
+
+Why is the third argument to fread always 1 in our code?
+
+What value does copy.c:70 assign padding if bi.biWidth is 3?
+
+What does fseek do?
+
+What is SEEK_CUR?

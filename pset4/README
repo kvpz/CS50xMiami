@@ -1,0 +1,79 @@
+copy.c:
+A program that creates a copy of a BMP, piece by piece. The difference
+between this program and the cmd command 'cp' is that this throws away
+the trailing zeroes found at the end of some BMPs.
+
+
+whodunit.c:
+This is a program (written for pset4 from cs50) that will reveal the image
+of Mr. Boddy found in the noisy image file clue.bmp. The clear image of
+Mr. Boddy should be store in verdict.bmp. 
+
+
+smiley.bmp file description:
+It is 8 pixels wide by 8 pixels tall, and it's a 24-bit BMP(each of whose
+pixels is represented with 24/8 = 3 bytes). Each row (aka "scanline") thus
+takes up (8 pixels)x(3 bytes per pixel) = 24 bytes, which happens to be a 
+multiple of 4.
+Since it is 8 by 8, it takes up 14 + 40 + (8 × 8) × 3 = 246 bytes on disk.
+
+To show the underlying bytes that compose smiley.bmp:
+xxd -c 24 -g 3 -s 54 smiley.bmp
+
+This command allows you to see the metadata in addition to the bitmap:
+xxd -c 24 -g 3 smiley.bmp
+
+NOTES: 
+- Each pixel is 3 bytes.
+
+- The argument following the flag -c represents how many bytes are to 
+  be displayed on each row of the xxd output. 
+
+- BMPs are stored differently if the number of bytes in a scanline is not
+  a multiple of 4. Example: for a BMP (such as small.bmp) that is 3x3, each
+  scanline thus takes up 9 bytes (not a multiple of 4!). In this case, 
+  3 bytes worth of zeroes are padding each line.
+
+- If the file actually contained ASCII characters, you'd see them in xxd's
+  rightmost column instead of the apparent dots.
+
+
+
+
+~/workspace/pset4/bmp (master) $ ~cs50/pset4/resize 2 smiley.bmp correctResize_smiley.bmp
+~/workspace/pset4/bmp (master) $ ~cs50/pset4/peek correctResize_smiley.bmp 
+offset  type   name              argv[1]
+0       WORD   bfType               4d42
+2       DWORD  bfSize           00000336
+6       WORD   bfReserved1          0000
+8       WORD   bfReserved2          0000
+10      DWORD  bfOffBits        00000036
+14      DWORD  biSize           00000028
+18      LONG   biWidth          00000010
+22      LONG   biHeight         fffffff0
+26      WORD   biPlanes             0001
+28      WORD   biBitCount           0018
+30      DWORD  biCompression    00000000
+34      DWORD  biSizeImage      00000300
+38      LONG   biXPelsPerMeter  00000b12
+42      LONG   biYPelsPerMeter  00000b12
+46      DWORD  biClrUsed        00000000
+50      DWORD  biClrImportant   00000000
+
+~/workspace/pset4/bmp (master) $ ~cs50/pset4/peek smiley.bmp offset  type   name              argv[1]
+0       WORD   bfType               4d42
+2       DWORD  bfSize           000000f6
+6       WORD   bfReserved1          0000
+8       WORD   bfReserved2          0000
+10      DWORD  bfOffBits        00000036
+14      DWORD  biSize           00000028
+18      LONG   biWidth          00000008
+22      LONG   biHeight         fffffff8
+26      WORD   biPlanes             0001
+28      WORD   biBitCount           0018
+30      DWORD  biCompression    00000000
+34      DWORD  biSizeImage      000000c0
+38      LONG   biXPelsPerMeter  00000b12
+42      LONG   biYPelsPerMeter  00000b12
+46      DWORD  biClrUsed        00000000
+50      DWORD  biClrImportant   00000000
