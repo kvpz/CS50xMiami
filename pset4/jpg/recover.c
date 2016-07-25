@@ -35,20 +35,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-//#include <inttypes.h>
 
+// these are the possible fourth initial fourth byte that identify a JPEG
 const char JPEGBytes[] = {0xe0, 0xe1, 0xe2, 0xe3, 0xe4, 
                           0xe5, 0xe6, 0xe7, 0xe8, 
                           0xe8, 0xe9, 0xea, 0xeb, 
                           0xec, 0xed, 0xee, 0xef};
 
-typedef struct
-{
-  uint8_t first;
-  uint8_t second;
-  uint8_t third;
-}__attribute__((__packed__))
-JPEGIdentifier;
 
 int getFileSize(FILE * file)
 {
@@ -61,7 +54,7 @@ int getFileSize(FILE * file)
 
 int main(void)
 {
-    FILE * infile = fopen("card.raw", "r");
+    FILE * infile = fopen("card.raw", "r"); // open corrupted JPEG files
     if(infile == NULL)
     {
       printf("File could not be opened\n");
@@ -70,33 +63,33 @@ int main(void)
     
     size_t infileSize = getFileSize(infile);
     
+    unsigned int total_512B_blocks = infileSize / 512;
     unsigned int blockCounter = 0;
     unsigned int JPEGFileCounter = 0;  // Used for naming 
     FILE * outfile = NULL;
     char JPEGName[7];        // stores JPG file names
     
-    while(blockCounter < infileSize / 512)
+    while(blockCounter++ < total_512B_blocks)
     {
       uint8_t JPEG[512]; // store image bytes
       fread(&JPEG, 1, 512, infile);
       
       if (JPEG[0] == 0xff && JPEG[1] == 0xd8 && JPEG[2] == 0xff) // new image
       {
-        if(outfile != NULL)  // Done here to avoid previous image backtrace error
+        if(outfile != NULL)  // close the previously written JPEG file
           fclose(outfile);
         
         sprintf(JPEGName,"%03d.jpg", JPEGFileCounter); // creating file name
         outfile = fopen(JPEGName, "w");
+        
         fwrite(&JPEG, 1, 512, outfile); 
         ++JPEGFileCounter;
       }
-      else if (outfile != NULL)
+      else if (outfile != NULL) // keep writing to discovered JPEG file
       {
           fwrite(&JPEG, 1, 512, outfile);
       } 
-      
-      ++blockCounter;
-    }
+    } // while
     
     fclose(infile);
     return 0;
