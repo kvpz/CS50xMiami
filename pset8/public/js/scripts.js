@@ -64,19 +64,30 @@ $(function() {
     // instantiate map
     map = new google.maps.Map(canvas, options);
 
-    // configure UI once Google Map is idle (i.e., loaded)
+    // configure UI once Google Map is idle (i.e., call configure())
     google.maps.event.addListenerOnce(map, "idle", configure);
-
 });
 
 /**
- * Adds marker (newspaper, thumb-tac, etc) for place to map. The 'place' (js object)
+ * Adds marker (newspaper, thumb-tac, etc) for place to map. The 'place' object
  * is a row from the MySQL table. Handle errors appopriately (video, 20:40)
  */
 function addMarker(place)
 {
-    //var lat_lng = {places[""]
-    //map = new google.maps.Marker() 
+    var image = "https://maps.google.com/mapfiles/kml/pal2/icon31.png";
+    // initial properties of the marker
+    var position = new google.maps.LatLng(place["latitude"], place["longitude"]);
+    var mapOptions = {
+      zoom: 4,
+      center: position
+    };
+    marker = new google.maps.Marker({
+        position: position,
+        title: place["place_name"],
+        label: place["place_name"],
+        icon: image
+    });
+    marker.setMap(map);
 }
 
 /**
@@ -162,6 +173,7 @@ function hideInfo()
 function removeMarkers()
 {
     // TODO
+    console.log("removing markers");
 }
 
 /**
@@ -198,9 +210,11 @@ function showInfo(marker, content)
     {
         // http://www.ajaxload.info/
         div += "<img alt='loading' src='img/ajax-loader.gif'/>";
+        console.log("showInfo() type of content is undefined");
     }
     else
     {
+        console.log("showInfo() div += content");
         div += content;
     }
 
@@ -232,11 +246,11 @@ function update()
     };
     $.getJSON("update.php", parameters)
     .done(function(data, textStatus, jqXHR) {
-        // 'data' comes from update.php
+        // 'data' comes from update.php.
         // remove old markers from map
         removeMarkers();
 
-        // add new markers to map
+        // add new markers to map (each data[i] is a row from `places`)
         for (var i = 0; i < data.length; i++)
         {
             addMarker(data[i]); 

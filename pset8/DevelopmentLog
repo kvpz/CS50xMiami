@@ -1,0 +1,8 @@
+=== Monday, February 13 2017 ===
++ Working on custom icons for the map markers. I was able to display regular markers, but to display a
+custom marker from 'https://maps.google.com/mapfiles/kml/pal2/icon31.png', I received a 403 error:
+"You don't have permission to access /js/markerwithlabel_packed.js line 1 &gt; eval on this server."
+http://stackoverflow.com/questions/10873295/error-message-forbidden-you-dont-have-permission-to-access-on-this-server
+I initially resolved the problem by referring to the Original solution of this post. Changes to httpd.conf were made.
+
++
