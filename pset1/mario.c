@@ -1,9 +1,22 @@
 #include <stdio.h>
-int main()
+#include <cgicc/CgiDefs.h>
+#include <cgicc/Cgicc.h>
+#include <cgicc/HTTPHTMLHeader.h>
+#include <cgicc/HTMLClasses.h>
+
+using namespace cgicc;
+
+int main(int argc, char** argv)
 {
     int input = 0,
         sresult = 0,
         temp = 0;
+    if(argc > 1 && argc < 3)
+    {
+	input = atoi(argv[1]);
+    }
+    else
+    {
     printf("Height: ");
     if((temp = getc(stdin)))
     {
@@ -28,7 +41,7 @@ int main()
             sresult = scanf("%d", &input);
         }
     }
-    
+    }
     
     for(int i = 0; i < input; ++i){
         for(int j = 0; j < input - i - 1; ++j)
