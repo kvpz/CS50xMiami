@@ -77,3 +77,7 @@ offset  type   name              argv[1]
 42      LONG   biYPelsPerMeter  00000b12
 46      DWORD  biClrUsed        00000000
 50      DWORD  biClrImportant   00000000
+
+
+#### Links/ References:
+https://cdn.cs50.net/2015/x/psets/4/pset4/pset4.html
