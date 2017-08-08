@@ -130,6 +130,7 @@ int main(int argc, char* argv[])
     // accept connections one at a time
     while (true)
     {
+      // reset()
         // free last path, if any
         if (path != NULL)
         {
@@ -174,20 +175,22 @@ int main(int argc, char* argv[])
                     error(500);
                     continue;
                 }
-                char line[needle - haystack + 2 + 1]; // needle is in a "larger" block of memory.
-                strncpy(line, haystack, needle - haystack + 2);
-                line[needle - haystack + 2] = '\0';
+		printf("MESSAGE:\n%s\n", message);
+                char request_line[needle - haystack + 2 + 1]; // needle is in a "larger" block of memory.
+                strncpy(request_line, haystack, needle - haystack + 2);
+                request_line[needle - haystack + 2] = '\0';
 
                 // log request-line
-                printf("%s", line); // <action type> /<file> HTTP/1.1
+                printf("%s", request_line); // <action type> /<file> HTTP/1.1
 
                 // parse request-line
                 char abs_path[LimitRequestLine + 1];
                 char query[LimitRequestLine + 1];
-                if (parse(line, abs_path, query))
+                if (parse(request_line, abs_path, query))
                 {
                     // URL-decode absolute-path
                     char* p = urldecode(abs_path);
+		    printf("Decoded url (p): %s\n", p);
                     if (p == NULL)
                     {
                         error(500);
@@ -203,8 +206,8 @@ int main(int argc, char* argv[])
                     }
                     strcpy(path, root);
                     strcat(path, p);
-                    free(p);
-
+                    //free(p);
+		    printf("Free(p) is good.\n");
                     // ensure path exists
                     if (access(path, F_OK) == -1)
                     {
@@ -216,9 +219,11 @@ int main(int argc, char* argv[])
                     struct stat sb;
                     if (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
                     {
+		      printf("if (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode)) TRUE\n");
                         // redirect from absolute-path to absolute-path/
                         if (abs_path[strlen(abs_path) - 1] != '/')
                         {
+			  printf("abs_path does not equal /\n");
                             char uri[strlen(abs_path) + 1 + 1];
                             strcpy(uri, abs_path);
                             strcat(uri, "/");
@@ -276,11 +281,13 @@ bool connected(void)
     struct sockaddr_in cli_addr;
     memset(&cli_addr, 0, sizeof(cli_addr));
     socklen_t cli_len = sizeof(cli_addr);
-    cfd = accept(sfd, (struct sockaddr*) &cli_addr, &cli_len);
+    cfd = accept(sfd/* the listening socket */, (struct sockaddr*) &cli_addr, &cli_len);
     if (cfd == -1)
     {
         return false;
     }
+
+    printf("A new connected socket with file descriptor %d has been made with %d.\n", cfd,sfd);
     return true;
 }
 
@@ -445,13 +452,11 @@ char* htmlspecialchars(const char* s)
  */
 char* indexes(const char* path)
 {
-    printf("INDEXES: path length = %lu", strlen(path));
-    //char fullpath[strlen(path) + 11];
-    //char fulltwo[strlen(path) + 11];
     char* fullpath = malloc(strlen(path) + 11);
     char* fulltwo = malloc(strlen(path) + 10);
-    strcat(fullpath, path);
-    strcat(fulltwo, path);
+
+    strcpy(fullpath, path);
+    strcpy(fulltwo, path);
     strcat(fullpath, "index.html");
     strcat(fulltwo, "index.php");
     if(fopen(fullpath, "r"))
@@ -462,7 +467,7 @@ char* indexes(const char* path)
     {
         return fulltwo;
     }
-    
+
     return NULL;
 }
 
@@ -724,17 +729,19 @@ const char* lookup(const char* path)
 */
 bool parse(const char* line, char* abs_path, char* query)
 {
+    printf("parsing...\n");
     abs_path = memset(abs_path, '\0', LimitRequestLine + 1); 
     //query = ""; // query[0] == '\0'
 
-    // find the method (must be GET), else error(405)
+    // find the request method (must be GET), else error(405)
     const char* method = strstr(line, "GET");
     if(method == NULL || method != line || *(method+3) != ' ')
     {
         error(405); // Method Not Allowed
         return false;
     }
-    
+
+    //if(strstr(method, "/") == NULL)
     if(*(method+4) != '/') // if request-targest doesn't begin with forward slash
     { 
         error(501);
@@ -783,7 +790,7 @@ bool parse(const char* line, char* abs_path, char* query)
         abs_path[dist] = '\0';
         //printf("NEW abs_path= %s\n", abs_path);
     }
-    
+    printf("Parse returning true.\n");
     return true;
 }
 
@@ -1026,11 +1033,12 @@ void start(short port, const char* path)
     {
         stop();
     }
-
+    printf("Socket(sfd): %d\n", sfd);
+    
     // allow reuse of address (to avoid "Address already in use")
     int optval = 1;
     setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-
+    printf("optval: %d\n", optval);
     // assign name to socket
     struct sockaddr_in serv_addr;
     memset(&serv_addr, 0, sizeof(serv_addr));
@@ -1044,7 +1052,9 @@ void start(short port, const char* path)
         printf("\033[39m\n");
         stop();
     }
-
+    
+    printf("sockaddr_in.sin_port(currently not in use): %d\n", serv_addr.sin_port);
+    printf("sockaddr_in.sin_addr.s_addr: %d\n", serv_addr.sin_addr.s_addr);
     // listen for connections
     if (listen(sfd, SOMAXCONN) == -1)
     {
@@ -1058,6 +1068,7 @@ void start(short port, const char* path)
     {
         stop();
     }
+    printf("addr.sin_addr.s_addr: %d\n", addr.sin_addr.s_addr);
     printf("\033[33m");
     printf("Listening on port %i", ntohs(addr.sin_port));
     printf("\033[39m\n");
